@@ -1,5 +1,9 @@
 # Codex Token Dashboard
 
+<p align="center">
+  <img src="Assets/AppIcon.png" width="128" alt="Codex Token Dashboard app icon">
+</p>
+
 A local-first macOS SwiftUI app for visualizing Codex token usage from local session logs.
 
 ## Install
