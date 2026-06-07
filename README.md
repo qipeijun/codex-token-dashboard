@@ -6,6 +6,10 @@
 
 A local-first macOS SwiftUI app for visualizing Codex token usage from local session logs.
 
+<p align="center">
+  <img src="Assets/DashboardPreview.png" alt="Codex Token Dashboard screenshot" width="100%">
+</p>
+
 ## Install
 
 Recommended one-line install:
