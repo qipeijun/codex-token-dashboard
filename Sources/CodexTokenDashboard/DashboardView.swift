@@ -277,18 +277,15 @@ struct TokenHeatmap: View {
                     }
                 }
 
-                Rectangle()
-                    .fill(Color.clear)
-                    .contentShape(Rectangle())
-                    .frame(width: gridWidth(columnCount: columns.count), height: gridHeight)
-                    .onContinuousHover { phase in
-                        switch phase {
-                        case .active(let location):
-                            hoveredIndex = nearestDayIndex(at: location, columnCount: columns.count)
-                        case .ended:
-                            hoveredIndex = nil
-                        }
-                                    }
+                HoverTrackingArea(
+                    onMove: { location in
+                        hoveredIndex = nearestDayIndex(at: location, columnCount: columns.count)
+                    },
+                    onExit: {
+                        hoveredIndex = nil
+                    }
+                )
+                .frame(width: gridWidth(columnCount: columns.count), height: gridHeight)
             }
             .frame(width: gridWidth(columnCount: columns.count), height: gridHeight, alignment: .topLeading)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -600,19 +597,20 @@ struct RecentUsageChart: View {
                             )
                     }
 
-                    Rectangle()
-                        .fill(Color.clear)
-                        .contentShape(Rectangle())
-                        .frame(width: plot.width, height: plot.height)
-                        .position(x: plot.midX, y: plot.midY)
-                        .onContinuousHover { phase in
-                            switch phase {
-                            case .active(let location):
-                                hoveredIndex = hoverIndex(at: location, in: plot, step: step)
-                            case .ended:
-                                hoveredIndex = nil
-                            }
+                    HoverTrackingArea(
+                        onMove: { location in
+                            let plotLocation = CGPoint(
+                                x: location.x + plot.minX,
+                                y: location.y + plot.minY
+                            )
+                            hoveredIndex = hoverIndex(at: plotLocation, in: plot, step: step)
+                        },
+                        onExit: {
+                            hoveredIndex = nil
                         }
+                    )
+                    .frame(width: plot.width, height: plot.height)
+                    .position(x: plot.midX, y: plot.midY)
 
                     ChartTimeMarkers(bins: bins, plot: plot)
                 }
@@ -749,6 +747,72 @@ struct ChartTimeMarkers: View {
 
     private func xPosition(for index: Int) -> CGFloat {
         plot.minX + CGFloat(index) * plot.width / CGFloat(max(bins.count - 1, 1))
+    }
+}
+
+struct HoverTrackingArea: NSViewRepresentable {
+    let onMove: (CGPoint) -> Void
+    let onExit: () -> Void
+
+    func makeNSView(context: Context) -> TrackingView {
+        let view = TrackingView()
+        view.onMove = onMove
+        view.onExit = onExit
+        return view
+    }
+
+    func updateNSView(_ nsView: TrackingView, context: Context) {
+        nsView.onMove = onMove
+        nsView.onExit = onExit
+    }
+
+    final class TrackingView: NSView {
+        var onMove: ((CGPoint) -> Void)?
+        var onExit: (() -> Void)?
+
+        override var isFlipped: Bool {
+            true
+        }
+
+        override var acceptsFirstResponder: Bool {
+            true
+        }
+
+        override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
+            true
+        }
+
+        override func hitTest(_ point: NSPoint) -> NSView? {
+            bounds.contains(point) ? self : nil
+        }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            window?.acceptsMouseMovedEvents = true
+        }
+
+        override func updateTrackingAreas() {
+            super.updateTrackingAreas()
+            trackingAreas.forEach { removeTrackingArea($0) }
+            addTrackingArea(NSTrackingArea(
+                rect: .zero,
+                options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited, .mouseMoved],
+                owner: self,
+                userInfo: nil
+            ))
+        }
+
+        override func mouseMoved(with event: NSEvent) {
+            onMove?(convert(event.locationInWindow, from: nil))
+        }
+
+        override func mouseEntered(with event: NSEvent) {
+            onMove?(convert(event.locationInWindow, from: nil))
+        }
+
+        override func mouseExited(with event: NSEvent) {
+            onExit?()
+        }
     }
 }
 
