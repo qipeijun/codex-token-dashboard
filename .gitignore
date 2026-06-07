@@ -1,0 +1,21 @@
+.DS_Store
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# Local app packaging output
+dist/
+
+# Workspace-only notes and validation artifacts
+CONTEXT.md
+PROJECT_INDEX.md
+notes/
+patches/
+plans/
+runs/
+
+# Xcode/editor user state
+*.xcuserstate
+xcuserdata/
