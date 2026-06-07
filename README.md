@@ -2,6 +2,18 @@
 
 A local-first macOS SwiftUI app for visualizing Codex token usage from local session logs.
 
+## Install
+
+Recommended one-line install:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hututuo/codex-token-dashboard/main/install.sh | bash
+```
+
+The installer downloads the latest `.app.zip` release, unpacks it, installs the app into `/Applications` when writable or `~/Applications` otherwise, removes the common `com.apple.quarantine` flag, and opens the app.
+
+This helps avoid the common macOS "app is damaged and can't be opened" message caused by browser-downloaded unsigned apps being quarantined. It is not a full replacement for Apple Developer ID signing and notarization. Company MDM, security software, or stricter macOS policy can still block unsigned apps.
+
 ## What It Does
 
 - Auto-detects local Codex data from a saved directory, `CODEX_HOME`, `~/.codex`, `~/.config/codex`, or one-level home-directory candidates.
@@ -31,6 +43,8 @@ state_5.sqlite
 
 ## Run
 
+For contributors who want to run from source:
+
 ```bash
 swift run CodexTokenDashboard
 ```
@@ -46,3 +60,7 @@ open "dist/Codex Token Dashboard.app"
 ## Notes
 
 This project intentionally starts as a Swift Package so contributors can build it without an Xcode project. A signed `.app` wrapper can be added later.
+
+## License
+
+MIT
